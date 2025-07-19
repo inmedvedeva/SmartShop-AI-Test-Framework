@@ -1,0 +1,24 @@
+{
+  "security_issues": [
+    "\u274c Hardcoded password found in tests/api/test_api_endpoints.py: password\": \"TestPass...",
+    "\u274c Hardcoded password found in tests/api/test_api_endpoints.py: password\": \"wrongpas...",
+    "\u274c Hardcoded api_key found in tests/unit/test_ai_data_generator.py: API_KEY': 'invalid-k...",
+    "\u274c Hardcoded api_key found in tests/unit/test_ai_data_generator.py: API_KEY': 'sk-test-v..."
+  ],
+  "warnings": [
+    "\u26a0\ufe0f Could not parse safety output"
+  ],
+  "passed_checks": [
+    "\u2705 .gitignore properly configured",
+    "\u2705 No sensitive environment files found",
+    "\u2705 No database files found",
+    "\u2705 No log files found",
+    "\u2705 File permissions are secure",
+    "\u2705 Pre-commit hooks are installed"
+  ],
+  "summary": {
+    "critical_issues": 4,
+    "warnings": 1,
+    "passed_checks": 6
+  }
+}

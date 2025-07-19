@@ -1,0 +1,30 @@
+# OpenAI Configuration
+# Get your key at https://platform.openai.com/account/api-keys
+# Copy this file to .env and replace with your key
+OPENAI_API_KEY=sk-your-openai-api-key-here
+OPENAI_MODEL=gpt-3.5-turbo
+OPENAI_MAX_TOKENS=1000
+OPENAI_TEMPERATURE=0.7
+OPENAI_TIMEOUT=30
+
+# Application URLs
+BASE_URL=https://automationexercise.com
+API_BASE_URL=https://automationexercise.com/api
+ADMIN_URL=https://automationexercise.com
+
+# Browser Configuration
+BROWSER=chrome
+HEADLESS=true
+BROWSER_TIMEOUT=30
+IMPLICIT_WAIT=10
+
+# Test Environment
+ENVIRONMENT=staging
+DEBUG=false
+LOG_LEVEL=INFO
+
+# Examples of other settings:
+# APPLITOOLS_API_KEY=your-applitools-key
+# SLACK_WEBHOOK_URL=your-slack-webhook
+# SMTP_USERNAME=your-email
+# SMTP_PASSWORD=your-password

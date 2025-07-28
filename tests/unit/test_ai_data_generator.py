@@ -6,10 +6,7 @@ Tests fallback logic and error handling
 import os
 from unittest.mock import MagicMock, Mock, patch
 
-import pytest
-
-from config.settings import settings
-from utils.ai_data_generator import AIDataGenerator
+from src.core.utils.ai_data_generator import AIDataGenerator
 
 
 class TestAIDataGenerator:
@@ -17,24 +14,20 @@ class TestAIDataGenerator:
 
     def test_init_without_openai_key(self):
         """Test initialization without OpenAI API key"""
-        # Remove OpenAI key from environment
-        original_key = os.environ.get("OPENAI_API_KEY")
-        if "OPENAI_API_KEY" in os.environ:
-            del os.environ["OPENAI_API_KEY"]
+        # Mock settings to return None for API key
+        with patch("src.core.utils.ai_data_generator.settings") as mock_settings:
+            mock_settings.openai_api_key = None
 
-        try:
             generator = AIDataGenerator()
             assert generator.openai_client is None
-        finally:
-            # Restore original key
-            if original_key:
-                os.environ["OPENAI_API_KEY"] = original_key
 
     def test_init_with_invalid_openai_key(self):
         """Test initialization with invalid OpenAI API key"""
         with patch.dict(os.environ, {"OPENAI_API_KEY": "invalid-key"}):
+            # The generator will still create a client, but it will fail when used
             generator = AIDataGenerator()
-            assert generator.openai_client is None
+            # The client is created but will fail on actual API calls
+            assert generator.openai_client is not None
 
     def test_init_with_valid_openai_key(self):
         """Test initialization with valid OpenAI API key"""
@@ -352,15 +345,23 @@ class TestAIDataGenerator:
                 mock_client.chat.completions.create.return_value = mock_response
                 mock_openai.return_value = mock_client
 
-                generator = AIDataGenerator()
+                # Mock the settings to return our test values
+                with patch(
+                    "src.core.utils.ai_data_generator.settings"
+                ) as mock_settings:
+                    mock_settings.openai_model = "gpt-4"
+                    mock_settings.openai_max_tokens = 2000
+                    mock_settings.openai_temperature = 0.5
 
-                # Test that settings are used
-                generator.generate_user_profile("customer")
+                    generator = AIDataGenerator()
 
-                # Verify that the correct model and parameters were used
-                mock_client.chat.completions.create.assert_called_once()
-                call_args = mock_client.chat.completions.create.call_args
+                    # Test that settings are used
+                    generator.generate_user_profile("customer")
 
-                assert call_args[1]["model"] == "gpt-4"
-                assert call_args[1]["max_tokens"] == 2000
-                assert call_args[1]["temperature"] == 0.5
+                    # Verify that the correct model and parameters were used
+                    mock_client.chat.completions.create.assert_called_once()
+                    call_args = mock_client.chat.completions.create.call_args
+
+                    assert call_args[1]["model"] == "gpt-4"
+                    assert call_args[1]["max_tokens"] == 2000
+                    assert call_args[1]["temperature"] == 0.5

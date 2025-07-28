@@ -1,50 +1,35 @@
-name: SmartShop AI Test Runner
+name: SmartShop AI Test Framework
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, master ]
   schedule:
-    # Run tests every day at 2:00 UTC
-    - cron: '0 2 * * *'
+    # Run cleanup every Sunday at 2 AM UTC
+    - cron: '0 2 * * 0'
   workflow_dispatch:
     inputs:
       test_type:
-        description: 'Test type to run'
-        required: true
+        description: 'Type of tests to run'
+        required: false
         default: 'all'
         type: choice
         options:
         - all
         - ui
         - api
+        - unit
         - performance
-        - visual
+        - mobile
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         python-version: [3.12]
         browser: [chrome, firefox]
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: test_password
-          POSTGRES_DB: smartshop_test
-          POSTGRES_USER: test_user
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
     - name: Checkout code
@@ -54,14 +39,6 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
@@ -73,20 +50,43 @@ jobs:
         playwright install
         playwright install-deps
 
+    - name: Install Chrome dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget gnupg
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+
+    - name: Install Firefox dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y firefox
+
     - name: Set up environment variables
       run: |
-        echo "BASE_URL=https://demo.smartshop.com" >> $GITHUB_ENV
-        echo "API_BASE_URL=https://api.smartshop.com" >> $GITHUB_ENV
+        echo "BASE_URL=https://automationexercise.com" >> $GITHUB_ENV
+        echo "API_BASE_URL=https://automationexercise.com/api" >> $GITHUB_ENV
         echo "HEADLESS=true" >> $GITHUB_ENV
         echo "BROWSER=${{ matrix.browser }}" >> $GITHUB_ENV
-        echo "DB_HOST=localhost" >> $GITHUB_ENV
-        echo "DB_PORT=5432" >> $GITHUB_ENV
-        echo "DB_NAME=smartshop_test" >> $GITHUB_ENV
-        echo "DB_USER=test_user" >> $GITHUB_ENV
-        echo "DB_PASSWORD=test_password" >> $GITHUB_ENV
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+
+    - name: Start Xvfb
+      run: |
+        sudo Xvfb -ac :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
 
     - name: Create reports directory
       run: mkdir -p reports/allure-results reports/html reports/screenshots
+
+    - name: Run basic tests
+      run: |
+        pytest tests/test_basic.py \
+          --alluredir=./reports/allure-results \
+          --html=./reports/html/basic_test_report.html \
+          --self-contained-html \
+          -v \
+          --tb=short
 
     - name: Run UI tests
       if: github.event.inputs.test_type == 'ui' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
@@ -111,6 +111,16 @@ jobs:
           -v \
           --tb=short
 
+    - name: Run unit tests
+      if: github.event.inputs.test_type == 'unit' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
+      run: |
+        pytest tests/unit/ \
+          --alluredir=./reports/allure-results \
+          --html=./reports/html/unit_test_report.html \
+          --self-contained-html \
+          -v \
+          --tb=short
+
     - name: Run performance tests
       if: github.event.inputs.test_type == 'performance' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
       run: |
@@ -121,18 +131,20 @@ jobs:
           -v \
           --tb=short
 
-    - name: Run visual tests
-      if: github.event.inputs.test_type == 'visual' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
+    - name: Run mobile tests
+      if: github.event.inputs.test_type == 'mobile' || github.event.inputs.test_type == 'all' || github.event.inputs.test_type == ''
       run: |
-        pytest tests/ui/ -m visual \
-          --browser=${{ matrix.browser }} \
+        python scripts/run_mobile_tests.py --cross-device --browser chromium
+        pytest tests/mobile/ \
           --alluredir=./reports/allure-results \
-          --html=./reports/html/visual_test_report.html \
+          --html=./reports/html/mobile_test_report.html \
           --self-contained-html \
           -v \
-          --tb=short
+          --tb=short \
+          --device IPHONE_12 \
+          --browser chromium
       env:
-        BROWSER: ${{ matrix.browser }}
+        BROWSER: chromium
 
     - name: Generate Allure report
       if: always()
@@ -141,25 +153,26 @@ jobs:
 
     - name: Upload test results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results-${{ matrix.browser }}-${{ github.run_number }}
         path: |
           reports/
           screenshots/
-        retention-days: 30
+          retention-days: 7
+          if-no-files-found: warn
 
     - name: Upload Allure report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: allure-report-${{ matrix.browser }}-${{ github.run_number }}
         path: reports/allure-report/
         retention-days: 30
 
     - name: Deploy Allure Report to GitHub Pages
-      if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
+      if: always() && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./reports/allure-report
@@ -168,7 +181,7 @@ jobs:
 
     - name: Comment PR with Test Results
       if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
+      uses: actions/github-script@v7
       with:
         script: |
           const fs = require('fs');
@@ -218,70 +231,60 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: always()
-
     steps:
-    - name: Download test results
-      uses: actions/download-artifact@v3
-      with:
-        pattern: test-results-*
-        merge-multiple: true
+      - name: Download test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-*
+          merge-multiple: true
 
-    - name: Parse test results
-      id: parse_results
-      run: |
-        # Count test results
-        if [ -f "reports/allure-results/executor.json" ]; then
-          echo "Test execution completed"
-          echo "status=completed" >> $GITHUB_OUTPUT
-        else
-          echo "status=failed" >> $GITHUB_OUTPUT
-        fi
+      - name: Parse test results
+        id: parse_results
+        run: |
+          # Count test results
+          if [ -f "reports/allure-results/executor.json" ]; then
+            echo "Test execution completed"
+            echo "status=completed" >> $GITHUB_OUTPUT
+          else
+            echo "status=failed" >> $GITHUB_OUTPUT
+          fi
 
-    - name: Send Slack notification
-      if: github.event_name != 'schedule'
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ steps.parse_results.outputs.status }}
-        channel: '#qa-notifications'
-        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-        text: |
-          🧪 SmartShop AI Test Results
-          **Branch:** ${{ github.ref_name }}
-          **Commit:** ${{ github.sha }}
-          **Status:** ${{ steps.parse_results.outputs.status }}
-          **Browser:** ${{ matrix.browser }}
-          **Workflow:** ${{ github.workflow }}
-          **Run:** ${{ github.run_number }}
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Send notification
+        run: |
+          echo "🧪 SmartShop AI Test Framework - Test execution completed"
+          echo "Status: ${{ steps.parse_results.outputs.status }}"
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Commit: ${{ github.sha }}"
 
   security-scan:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Run security scan
-      run: |
-        echo "Running security scan..."
-        # Security tools can be added here
-        # For example: bandit, safety, etc.
-        pip install bandit safety
-        bandit -r . -f json -o reports/security-scan.json || true
-        safety check --json --output reports/safety-scan.json || true
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
 
-    - name: Upload security scan results
-      uses: actions/upload-artifact@v3
-      with:
-        name: security-scan-results
-        path: reports/security-scan.json reports/safety-scan.json
-        retention-days: 90
+      - name: Run security scan
+        run: |
+          echo "Running security scan..."
+          pip install bandit safety
+          bandit -r . -f json -o reports/security-scan.json || true
+          safety check --json --output reports/safety-scan.json || true
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-results
+          path: reports/security-scan.json reports/safety-scan.json
+          retention-days: 90
 
   code-quality:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
 
     steps:
     - name: Checkout code
@@ -334,3 +337,27 @@ jobs:
       run: |
         pip install safety
         safety check --full-report
+
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run cleanup
+        run: python scripts/cleanup_reports.py --days 7
+
+      - name: Report cleanup results
+        run: |
+          echo "🧹 Weekly cleanup completed"
+          echo "Reports older than 7 days have been removed"
+          echo "Repository size optimized"

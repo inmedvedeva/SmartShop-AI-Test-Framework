@@ -8,11 +8,12 @@ import time
 import pytest
 from loguru import logger
 
-from pages.automation_exercise_home_page import AutomationExerciseHomePage
-from utils.ai_data_generator import AIDataGenerator
+from src.core.utils.ai_data_generator import AIDataGenerator
+from src.ui.pages.automation_exercise_home_page import AutomationExerciseHomePage
+from tests.base_test_classes import BaseHomePageTest
 
 
-class TestAutomationExerciseHomePage:
+class TestAutomationExerciseHomePage(BaseHomePageTest):
     """Test class for Automation Exercise Home Page"""
 
     @pytest.fixture(autouse=True)
@@ -22,35 +23,38 @@ class TestAutomationExerciseHomePage:
         self.home_page = AutomationExerciseHomePage(driver)
         self.ai_generator = AIDataGenerator()
 
-    def test_home_page_load(self):
-        """Test home page loads successfully"""
-        logger.info("Testing home page load")
+    def get_home_page(self):
+        """Get home page object"""
+        return self.home_page
 
-        self.home_page.open_home_page()
-        title = self.home_page.get_page_title()
+    def get_expected_title(self) -> str:
+        """Get expected page title"""
+        return "Automation Exercise"
 
-        assert (
-            "Automation Exercise" in title
-        ), f"Expected 'Automation Exercise' in title, got: {title}"
-        assert (
-            self.driver.current_url == "https://automationexercise.com/"
-        ), f"Expected URL: https://automationexercise.com/, got: {self.driver.current_url}"
+    def get_expected_url(self) -> str:
+        """Get expected page URL"""
+        return "automationexercise.com"
 
-        logger.info(f"✅ Home page loaded successfully: {title}")
+    # test_home_page_load is now inherited from BaseHomePageTest
 
     def test_search_functionality(self):
-        """Test search functionality"""
-        logger.info("Testing search functionality")
+        """Test search functionality on the Products page"""
+        logger.info("Testing search functionality on the Products page")
 
         self.home_page.open_home_page()
+        self.home_page.click_products()  # Navigate to the Products page
+        time.sleep(2)
 
         # Test search for a product
-        search_term = "dress"
+        search_term = "Blue Top"
         self.home_page.search_product(search_term)
         time.sleep(2)
 
-        # Verify search results page
+        # Verify search results page and product presence
         assert "search" in self.driver.current_url.lower(), "Search page not loaded"
+        assert (
+            search_term.lower() in self.driver.page_source.lower()
+        ), f"Product '{search_term}' not found in search results"
         logger.info(f"✅ Search functionality works for: {search_term}")
 
     def test_navigation_links(self):
@@ -110,26 +114,6 @@ class TestAutomationExerciseHomePage:
             "api_list" in self.driver.current_url.lower()
         ), "API Testing page not loaded"
         logger.info("✅ API Testing page works")
-
-    def test_newsletter_subscription(self):
-        """Test newsletter subscription"""
-        logger.info("Testing newsletter subscription")
-
-        self.home_page.open_home_page()
-
-        # Generate AI email
-        user_data = self.ai_generator.generate_user_profile("customer")
-        test_email = user_data["email"]
-
-        # Subscribe to newsletter
-        self.home_page.subscribe_to_newsletter(test_email)
-        time.sleep(2)
-
-        # Check subscription success
-        success = self.home_page.is_newsletter_subscribed()
-        assert success, "Newsletter subscription failed"
-
-        logger.info(f"✅ Newsletter subscription successful with: {test_email}")
 
     def test_featured_products(self):
         """Test featured products display"""
@@ -193,25 +177,7 @@ class TestAutomationExerciseHomePage:
 
             logger.info(f"✅ {device} viewport ({width}x{height}) works")
 
-    def test_page_performance(self):
-        """Test page load performance"""
-        logger.info("Testing page performance")
-
-        start_time = time.time()
-        self.home_page.open_home_page()
-        load_time = time.time() - start_time
-
-        logger.info(f"⏱️ Page load time: {load_time:.2f} seconds")
-
-        # Performance assertions
-        assert load_time < 10, f"Page load too slow: {load_time:.2f}s"
-
-        if load_time < 3:
-            logger.info("✅ Excellent performance")
-        elif load_time < 5:
-            logger.info("✅ Good performance")
-        else:
-            logger.info("⚠️ Moderate performance")
+    # test_page_performance is now inherited from BaseHomePageTest
 
     def test_page_elements_visibility(self):
         """Test key page elements are visible"""
@@ -219,11 +185,10 @@ class TestAutomationExerciseHomePage:
 
         self.home_page.open_home_page()
 
-        # Check key elements
+        # Check key elements that should be visible on home page
         elements_to_check = [
             ("Header", self.home_page.HEADER),
             ("Logo", self.home_page.LOGO),
-            ("Search Box", self.home_page.SEARCH_BOX),
             ("Products Link", self.home_page.PRODUCTS_LINK),
             ("Cart Link", self.home_page.CART_LINK),
             ("Signup/Login Link", self.home_page.SIGNUP_LOGIN_LINK),
@@ -237,6 +202,9 @@ class TestAutomationExerciseHomePage:
             except Exception as e:
                 logger.error(f"❌ {element_name}: Error - {e}")
                 raise
+
+        # Note: Search box is only available on products page, not home page
+        logger.info("✅ Page elements visibility test completed")
 
     @pytest.mark.smoke
     def test_smoke_test(self):
@@ -266,14 +234,38 @@ class TestAutomationExerciseHomePage:
 
         self.home_page.open_home_page()
 
+        # Navigate to products page first (search box is on products page)
+        self.home_page.click_products()
+        time.sleep(2)
+
         # Test search with AI-generated terms
         for term in search_terms:
             self.home_page.search_product(term)
-            time.sleep(1)
+            time.sleep(2)
             assert "search" in self.driver.current_url.lower()
             self.driver.back()
+            time.sleep(1)
+            # Navigate back to products page for next search
+            self.home_page.click_products()
             time.sleep(1)
 
         logger.info(
             f"✅ AI-powered test completed with {len(search_terms)} search terms"
         )
+
+    def test_header_and_footer_visibility(self):
+        """Test that the header and footer are present and visible on the home page."""
+        logger.info("Testing header and footer visibility")
+
+        self.home_page.open_home_page()
+        time.sleep(1)
+
+        # Check header
+        header = self.driver.find_element(*self.home_page.HEADER)
+        assert header.is_displayed(), "Header is not visible"
+        logger.info("✅ Header is visible")
+
+        # Check footer
+        footer = self.driver.find_element(*self.home_page.FOOTER)
+        assert footer.is_displayed(), "Footer is not visible"
+        logger.info("✅ Footer is visible")

@@ -8,11 +8,9 @@ import time
 import pytest
 from loguru import logger
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 
-from pages.nopcommerce_home_page import NopCommerceHomePage
-from utils.ai_data_generator import AIDataGenerator
+from src.core.utils.ai_data_generator import AIDataGenerator
+from src.ui.pages.nopcommerce_home_page import NopCommerceHomePage
 
 
 class TestNopCommerceHomePage:
@@ -247,8 +245,8 @@ class TestNopCommerceHomePage:
         self.home_page.open_home_page()
         load_time = time.time() - start_time
 
-        # Verify page loads within reasonable time (10 seconds)
-        assert load_time < 10, f"Page load took too long: {load_time:.2f} seconds"
+        # Verify page loads within reasonable time (15 seconds due to Cloudflare protection)
+        assert load_time < 15, f"Page load took too long: {load_time:.2f} seconds"
 
         logger.info(f"✅ Page loaded in {load_time:.2f} seconds")
 

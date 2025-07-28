@@ -2,7 +2,7 @@
 SmartShop AI Test Framework
 ===========================
 
-Comprehensive test framework for demonstrating Automation QA Engineer skills with AI integration.
+Comprehensive test framework for demonstrating Automation QA Engineer skills.
 
 Key Features:
 - UI testing with Selenium/Playwright
@@ -22,9 +22,9 @@ __author__ = "Automation QA Engineer"
 __email__ = "qa@smartshop.com"
 
 # Imports for convenience
-from config.settings import get_settings, settings
-from utils.ai_data_generator import AIDataGenerator
-from utils.visual_testing import VisualTester
+from src.core.config.settings import get_settings, settings
+from src.core.utils.ai_data_generator import AIDataGenerator
+from src.core.utils.visual_testing import VisualTester
 
 # Main classes for quick access
 __all__ = ["settings", "get_settings", "AIDataGenerator", "VisualTester"]

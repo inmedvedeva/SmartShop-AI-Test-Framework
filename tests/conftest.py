@@ -2,7 +2,13 @@
 Pytest configuration and fixtures for SmartShop AI Test Framework
 """
 
+import os
+import sys
 import time
+from pathlib import Path
+
+# Add project root to path for imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pytest
 from loguru import logger
@@ -14,7 +20,9 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
-from config.settings import settings
+from src.core.config.settings import settings
+from src.core.utils.ai_data_generator import AIDataGenerator
+from src.core.utils.visual_testing import VisualTester
 
 
 def pytest_addoption(parser):
@@ -189,16 +197,12 @@ def _setup_edge_driver(headless_mode):
 @pytest.fixture(scope="function")
 def ai_generator():
     """AI Data Generator fixture"""
-    from utils.ai_data_generator import AIDataGenerator
-
     return AIDataGenerator()
 
 
 @pytest.fixture(scope="function")
 def visual_tester():
     """Visual Tester fixture"""
-    from utils.visual_testing import VisualTester
-
     return VisualTester()
 
 
@@ -237,16 +241,21 @@ def pytest_runtest_makereport(item, call):
                 screenshot_path = f"./reports/screenshots/{screenshot_name}"
 
                 # Ensure screenshots directory exists
-                import os
 
                 os.makedirs("./reports/screenshots", exist_ok=True)
 
                 driver.save_screenshot(screenshot_path)
                 logger.info(f"📸 Screenshot saved: {screenshot_path}")
 
-                # Add screenshot path to test report
-                if hasattr(rep, "extras"):
+                # Add screenshot to HTML report if available
+                try:
+                    import pytest_html
+
                     rep.extras.append(pytest_html.extras.image(screenshot_path))
+                except ImportError:
+                    logger.warning(
+                        "pytest-html not available for screenshot attachment"
+                    )
 
         except Exception as e:
             logger.warning(f"Failed to capture screenshot: {e}")
@@ -256,7 +265,7 @@ def pytest_runtest_makereport(item, call):
 def pytest_sessionstart(session):
     """Actions to perform at the start of test session"""
     logger.info("🚀 Starting test session")
-    logger.info(f"📊 Test configuration:")
+    logger.info("📊 Test configuration:")
     logger.info(f"   • Browser: {session.config.getoption('--browser')}")
     logger.info(f"   • Headless: {session.config.getoption('--headless')}")
     logger.info(f"   • Base URL: {session.config.getoption('--url')}")

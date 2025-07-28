@@ -1,19 +1,19 @@
 #!/bin/bash
 
 # SmartShop AI Test Framework - Test Runner Script
-# Автор: Automation QA Engineer
-# Версия: 1.0
+# Author: Automation QA Engineer
+# Version: 1.0
 
 set -e
 
-# Цвета для вывода
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Функция для вывода сообщений
+# Function for outputting messages
 print_message() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -30,31 +30,31 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Функция для показа справки
+# Function to show help
 show_help() {
     echo "SmartShop AI Test Framework - Test Runner"
     echo ""
-    echo "Использование: $0 [ОПЦИИ]"
+    echo "Usage: $0 [OPTIONS]"
     echo ""
-    echo "Опции:"
-    echo "  -t, --test-type TYPE     Тип тестов (ui, api, performance, visual, all)"
-    echo "  -b, --browser BROWSER    Браузер для UI тестов (chrome, firefox, edge)"
-    echo "  -p, --parallel           Запуск тестов параллельно"
-    echo "  -r, --rerun              Количество повторных запусков для неудачных тестов"
-    echo "  -m, --markers MARKERS    Маркеры pytest для фильтрации тестов"
-    echo "  -o, --output FORMAT      Формат отчета (html, allure, json)"
-    echo "  -v, --verbose            Подробный вывод"
-    echo "  -h, --help               Показать эту справку"
+    echo "Options:"
+    echo "  -t, --test-type TYPE     Test type (ui, api, performance, visual, all)"
+    echo "  -b, --browser BROWSER    Browser for UI tests (chrome, firefox, edge)"
+    echo "  -p, --parallel           Run tests in parallel"
+    echo "  -r, --rerun              Number of retries for failed tests"
+    echo "  -m, --markers MARKERS    Pytest markers for test filtering"
+    echo "  -o, --output FORMAT      Report format (html, allure, json)"
+    echo "  -v, --verbose            Verbose output"
+    echo "  -h, --help               Show this help"
     echo ""
-    echo "Примеры:"
-    echo "  $0 -t ui -b chrome                    # UI тесты в Chrome"
-    echo "  $0 -t api                             # API тесты"
-    echo "  $0 -t all -p -r 2                     # Все тесты параллельно с 2 повторами"
-    echo "  $0 -m smoke -o allure                 # Дымовые тесты с Allure отчетом"
+    echo "Examples:"
+    echo "  $0 -t ui -b chrome                    # UI tests in Chrome"
+    echo "  $0 -t api                             # API tests"
+    echo "  $0 -t all -p -r 2                     # All tests in parallel with 2 retries"
+    echo "  $0 -m smoke -o allure                 # Smoke tests with Allure report"
     echo ""
 }
 
-# Параметры по умолчанию
+# Default parameters
 TEST_TYPE="all"
 BROWSER="chrome"
 PARALLEL=false
@@ -63,7 +63,7 @@ MARKERS=""
 OUTPUT_FORMAT="html"
 VERBOSE=false
 
-# Парсинг аргументов командной строки
+# Command line argument parsing
 while [[ $# -gt 0 ]]; do
     case $1 in
         -t|--test-type)
@@ -99,64 +99,64 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         *)
-            print_error "Неизвестная опция: $1"
+            print_error "Unknown option: $1"
             show_help
             exit 1
             ;;
     esac
 done
 
-# Проверка виртуального окружения
+# Check virtual environment
 check_venv() {
     if [[ "$VIRTUAL_ENV" == "" ]]; then
-        print_warning "Виртуальное окружение не активировано"
+        print_warning "Virtual environment is not activated"
         if [ -d "venv" ]; then
-            print_message "Активируем виртуальное окружение..."
+            print_message "Activating virtual environment..."
             source venv/bin/activate
         else
-            print_error "Виртуальное окружение не найдено. Создайте его командой: python -m venv venv"
+            print_error "Virtual environment not found. Create it with: python -m venv venv"
             exit 1
         fi
     fi
 }
 
-# Проверка зависимостей
+# Check dependencies
 check_dependencies() {
-    print_message "Проверяем зависимости..."
+    print_message "Checking dependencies..."
 
     if ! command -v python &> /dev/null; then
-        print_error "Python не установлен"
+        print_error "Python is not installed"
         exit 1
     fi
 
     if ! python -c "import pytest" &> /dev/null; then
-        print_error "pytest не установлен. Установите зависимости: pip install -r requirements.txt"
+        print_error "pytest is not installed. Install dependencies: pip install -r requirements.txt"
         exit 1
     fi
 
     if ! python -c "import selenium" &> /dev/null; then
-        print_error "selenium не установлен"
+        print_error "selenium is not installed"
         exit 1
     fi
 
-    print_success "Зависимости проверены"
+    print_success "Dependencies checked"
 }
 
-# Создание директорий для отчетов
+# Create directories for reports
 create_report_dirs() {
-    print_message "Создаем директории для отчетов..."
+    print_message "Creating directories for reports..."
 
     mkdir -p reports/allure-results
     mkdir -p reports/html
     mkdir -p reports/screenshots
     mkdir -p reports/json
 
-    print_success "Директории созданы"
+    print_success "Directories created"
 }
 
-# Настройка переменных окружения
+# Set up environment variables
 setup_environment() {
-    print_message "Настраиваем переменные окружения..."
+    print_message "Setting up environment variables..."
 
     export BROWSER=$BROWSER
     export HEADLESS=true
@@ -165,14 +165,14 @@ setup_environment() {
         export PYTEST_ADDOPTS="-v -s"
     fi
 
-    print_success "Переменные окружения настроены"
+    print_success "Environment variables set"
 }
 
-# Формирование команды pytest
+# Build pytest command
 build_pytest_command() {
     local cmd="pytest"
 
-    # Определяем путь к тестам
+    # Determine test path
     case $TEST_TYPE in
         "ui")
             cmd="$cmd tests/ui/"
@@ -190,27 +190,27 @@ build_pytest_command() {
             cmd="$cmd tests/"
             ;;
         *)
-            print_error "Неизвестный тип тестов: $TEST_TYPE"
+            print_error "Unknown test type: $TEST_TYPE"
             exit 1
             ;;
     esac
 
-    # Добавляем маркеры если указаны
+    # Add markers if specified
     if [ ! -z "$MARKERS" ]; then
         cmd="$cmd -m $MARKERS"
     fi
 
-    # Добавляем параллельное выполнение
+    # Add parallel execution
     if [ "$PARALLEL" = true ]; then
         cmd="$cmd -n auto"
     fi
 
-    # Добавляем повторные запуски
+    # Add retries
     if [ "$RERUN" -gt 0 ]; then
         cmd="$cmd --reruns $RERUN --reruns-delay 1"
     fi
 
-    # Добавляем форматы отчетов
+    # Add report formats
     case $OUTPUT_FORMAT in
         "html")
             cmd="$cmd --html=reports/html/test_report.html --self-contained-html"
@@ -229,103 +229,103 @@ build_pytest_command() {
     echo "$cmd"
 }
 
-# Запуск тестов
+# Run tests
 run_tests() {
     local cmd=$(build_pytest_command)
 
-    print_message "Запускаем тесты..."
-    print_message "Команда: $cmd"
+    print_message "Running tests..."
+    print_message "Command: $cmd"
     echo ""
 
-    # Засекаем время
+    # Start time
     local start_time=$(date +%s)
 
-    # Запускаем тесты
+    # Run tests
     if eval $cmd; then
         local end_time=$(date +%s)
         local duration=$((end_time - start_time))
 
-        print_success "Тесты завершены успешно за ${duration} секунд"
+        print_success "Tests completed successfully in ${duration} seconds"
 
-        # Показываем информацию об отчетах
+        # Show report information
         show_report_info
 
     else
         local end_time=$(date +%s)
         local duration=$((end_time - start_time))
 
-        print_error "Тесты завершены с ошибками за ${duration} секунд"
+        print_error "Tests completed with errors in ${duration} seconds"
 
-        # Показываем информацию об отчетах даже при ошибках
+        # Show report information even on errors
         show_report_info
 
         exit 1
     fi
 }
 
-# Показ информации об отчетах
+# Show report information
 show_report_info() {
     echo ""
-    print_message "Отчеты сгенерированы:"
+    print_message "Reports generated:"
 
     if [ -f "reports/html/test_report.html" ]; then
-        echo "  📊 HTML отчет: reports/html/test_report.html"
+        echo "  📊 HTML report: reports/html/test_report.html"
     fi
 
     if [ -d "reports/allure-results" ] && [ "$(ls -A reports/allure-results)" ]; then
-        echo "  📈 Allure результаты: reports/allure-results/"
-        echo "  💡 Для просмотра Allure отчета выполните: allure serve reports/allure-results"
+        echo "  📈 Allure results: reports/allure-results/"
+        echo "  💡 To view Allure report, run: allure serve reports/allure-results"
     fi
 
     if [ -f "reports/json/test_report.json" ]; then
-        echo "  📋 JSON отчет: reports/json/test_report.json"
+        echo "  📋 JSON report: reports/json/test_report.json"
     fi
 
     if [ -d "reports/screenshots" ] && [ "$(ls -A reports/screenshots)" ]; then
-        echo "  📸 Скриншоты: reports/screenshots/"
+        echo "  📸 Screenshots: reports/screenshots/"
     fi
 }
 
-# Очистка старых отчетов
+# Clean up old reports
 cleanup_old_reports() {
-    print_message "Очищаем старые отчеты..."
+    print_message "Cleaning up old reports..."
 
-    # Удаляем старые HTML отчеты (старше 7 дней)
+    # Delete old HTML reports (older than 7 days)
     find reports/html -name "*.html" -mtime +7 -delete 2>/dev/null || true
 
-    # Удаляем старые скриншоты (старше 3 дней)
+    # Delete old screenshots (older than 3 days)
     find reports/screenshots -name "*.png" -mtime +3 -delete 2>/dev/null || true
 
-    print_success "Очистка завершена"
+    print_success "Cleanup complete"
 }
 
-# Основная функция
+# Main function
 main() {
     echo "🧪 SmartShop AI Test Framework"
     echo "================================"
     echo ""
 
-    print_message "Тип тестов: $TEST_TYPE"
-    print_message "Браузер: $BROWSER"
-    print_message "Параллельно: $PARALLEL"
-    print_message "Повторы: $RERUN"
-    print_message "Маркеры: $MARKERS"
-    print_message "Формат отчета: $OUTPUT_FORMAT"
-    print_message "Подробный вывод: $VERBOSE"
+    print_message "Test type: $TEST_TYPE"
+    print_message "Browser: $BROWSER"
+    print_message "Parallel: $PARALLEL"
+    print_message "Retries: $RERUN"
+    print_message "Markers: $MARKERS"
+    print_message "Report format: $OUTPUT_FORMAT"
+    print_message "Verbose output: $VERBOSE"
     echo ""
 
-    # Выполняем проверки и настройки
+    # Perform checks and setups
     check_venv
     check_dependencies
     create_report_dirs
     setup_environment
     cleanup_old_reports
 
-    # Запускаем тесты
+    # Run tests
     run_tests
 
-    print_success "Тестирование завершено!"
+    print_success "Testing completed!"
 }
 
-# Запуск основной функции
+# Start main function
 main "$@"

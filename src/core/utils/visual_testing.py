@@ -5,12 +5,12 @@ Integration with Applitools and custom computer vision algorithms
 
 import os
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import cv2
 import numpy as np
 from loguru import logger
-from PIL import Image, ImageChops, ImageEnhance
+from PIL import Image
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC

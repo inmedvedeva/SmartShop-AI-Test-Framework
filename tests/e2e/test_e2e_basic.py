@@ -196,7 +196,7 @@ class TestE2EBasic:
         driver.get("https://automationexercise.com/nonexistent-page")
 
         # Step 2: Check if we get redirected or error page
-        current_url = driver.current_url
+        # current_url = driver.current_url  # Unused variable
 
         # Step 3: Navigate back to valid page
         driver.get("https://automationexercise.com/")

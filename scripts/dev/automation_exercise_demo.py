@@ -90,7 +90,7 @@ def main():
                         print(f"   ✅ Search box found with: {selector}")
                         search_found = True
                         break
-                except:
+                except Exception:
                     continue
 
             if not search_found:
@@ -112,7 +112,7 @@ def main():
                         print(f"   ✅ {link_name} link found")
                     else:
                         print(f"   ⚠️ {link_name} link not visible")
-                except:
+                except Exception:
                     print(f"   ❌ {link_name} link not found")
 
             # Check for products
@@ -133,7 +133,7 @@ def main():
                         )
                         products_found = True
                         break
-                except:
+                except Exception:
                     continue
 
             if not products_found:
@@ -157,7 +157,7 @@ def main():
                 driver.get(f"https://automationexercise.com/search?q={search_term}")
                 time.sleep(2)
                 print(f"   ✅ Manual search URL: {driver.current_url}")
-            except:
+            except Exception:
                 print(f"   ❌ Manual search also failed")
 
         # Go back to home
@@ -348,7 +348,7 @@ def main():
                 time.sleep(1)
                 if "search" in driver.current_url.lower():
                     successful_searches += 1
-            except:
+            except Exception:
                 pass
 
         print(f"   ✅ {successful_searches}/3 AI-powered searches successful")

@@ -166,4 +166,3 @@ class TestRegressionBasic:
             except Exception:
                 # Some images might not have naturalWidth/Height attributes
                 pass
- 

@@ -5,6 +5,7 @@ Shows how visual testing works with fallback to basic comparison
 """
 
 import os
+import sys
 import time
 from pathlib import Path
 

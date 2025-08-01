@@ -4,7 +4,7 @@ Tests fallback logic and error handling
 """
 
 import os
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 from src.core.utils.ai_data_generator import AIDataGenerator
 

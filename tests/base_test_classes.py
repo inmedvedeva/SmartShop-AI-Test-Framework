@@ -4,7 +4,6 @@ Base test classes with common functionality
 
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
 
 from loguru import logger
 

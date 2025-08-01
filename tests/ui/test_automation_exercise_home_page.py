@@ -229,7 +229,7 @@ class TestAutomationExerciseHomePage(BaseHomePageTest):
         logger.info("Running AI-powered test")
 
         # Generate dynamic test data
-        user_data = self.ai_generator.generate_user_profile("customer")
+        # user_data = self.ai_generator.generate_user_profile("customer")  # Unused variable
         search_terms = self.ai_generator.generate_search_terms(3)
 
         self.home_page.open_home_page()

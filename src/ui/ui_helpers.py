@@ -3,12 +3,10 @@ UI helper utilities for SmartShop AI Test Framework
 """
 
 import time
-from typing import Optional, Tuple
 
 from loguru import logger
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 

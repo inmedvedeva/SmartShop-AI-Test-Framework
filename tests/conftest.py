@@ -5,7 +5,6 @@ Pytest configuration and fixtures for SmartShop AI Test Framework
 import os
 import sys
 import time
-from pathlib import Path
 
 # Add project root to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

@@ -3,7 +3,6 @@ Base class for Page Object Model
 """
 
 import time
-from typing import Any, List, Optional
 
 from loguru import logger
 from selenium.common.exceptions import NoSuchElementException, TimeoutException

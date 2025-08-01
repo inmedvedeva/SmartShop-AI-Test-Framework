@@ -39,7 +39,7 @@ def user_data():
     return {
         "name": "TestUser",
         "email": email,
-                "password": "TestPassword123!",
+        "password": "TestPassword123!",
         "title": "Mr",
         "birth_date": "1",
         "birth_month": "January",
@@ -163,6 +163,6 @@ def test_create_user_existing_email(user_data):
     # Attempt to create a user with the same email
     resp = requests.post(f"{BASE_URL}/createAccount", data=user_data)
     assert resp.status_code in (409, 400, 200)
-            assert (
+    assert (
         "already exists" in resp.text or "error" in resp.text or "exists" in resp.text
     )

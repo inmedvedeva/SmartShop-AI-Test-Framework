@@ -90,7 +90,7 @@ def main():
                         print(f"   ✅ Search box found with: {selector}")
                         search_found = True
                         break
-                except:
+                except Exception:
                     continue
 
             if not search_found:
@@ -112,7 +112,7 @@ def main():
                         print(f"   ✅ {link_name} link found")
                     else:
                         print(f"   ⚠️ {link_name} link not visible")
-                except:
+                except Exception:
                     print(f"   ❌ {link_name} link not found")
 
             # Check for products
@@ -133,7 +133,7 @@ def main():
                         )
                         products_found = True
                         break
-                except:
+                except Exception:
                     continue
 
             if not products_found:
@@ -157,8 +157,8 @@ def main():
                 driver.get(f"https://automationexercise.com/search?q={search_term}")
                 time.sleep(2)
                 print(f"   ✅ Manual search URL: {driver.current_url}")
-            except:
-                print(f"   ❌ Manual search also failed")
+            except Exception:
+                print("   ❌ Manual search also failed")
 
         # Go back to home
         driver.get("https://automationexercise.com/")
@@ -348,7 +348,7 @@ def main():
                 time.sleep(1)
                 if "search" in driver.current_url.lower():
                     successful_searches += 1
-            except:
+            except Exception:
                 pass
 
         print(f"   ✅ {successful_searches}/3 AI-powered searches successful")
@@ -358,36 +358,36 @@ def main():
         print("🎉 Automation Exercise Demo Completed!")
         print("=" * 60)
 
-        print(f"\n📊 Demo Summary:")
-        print(f"   ✅ Home page loaded successfully")
-        print(f"   ✅ Search functionality works")
-        print(f"   ✅ Navigation links functional")
-        print(f"   ✅ Special pages accessible")
+        print("\n📊 Demo Summary:")
+        print("   ✅ Home page loaded successfully")
+        print("   ✅ Search functionality works")
+        print("   ✅ Navigation links functional")
+        print("   ✅ Special pages accessible")
         print(f"   ✅ {len(featured_products)} products found")
-        print(f"   ✅ Newsletter subscription tested")
+        print("   ✅ Newsletter subscription tested")
         print(
             f"   ✅ {visible_elements}/{len(elements_to_check)} page elements visible"
         )
         print(f"   ✅ Page load time: {load_time:.2f}s")
         print(f"   ✅ {responsive_tests}/{len(viewports)} responsive tests passed")
-        print(f"   ✅ AI integration working")
+        print("   ✅ AI integration working")
 
-        print(f"\n🌟 Key Benefits of Automation Exercise:")
-        print(f"   🎯 Purpose-built for automation testing")
-        print(f"   🛡️ No bot protection or CAPTCHA")
-        print(f"   📚 Rich e-commerce functionality")
-        print(f"   🔧 API endpoints available")
-        print(f"   📱 Responsive design")
-        print(f"   🎨 Modern UI/UX")
-        print(f"   📊 Realistic test scenarios")
+        print("\n🌟 Key Benefits of Automation Exercise:")
+        print("   🎯 Purpose-built for automation testing")
+        print("   🛡️ No bot protection or CAPTCHA")
+        print("   📚 Rich e-commerce functionality")
+        print("   🔧 API endpoints available")
+        print("   📱 Responsive design")
+        print("   🎨 Modern UI/UX")
+        print("   📊 Realistic test scenarios")
 
-        print(f"\n🚀 Ready for:")
-        print(f"   • UI automation practice")
-        print(f"   • API testing exercises")
-        print(f"   • Performance testing")
-        print(f"   • Mobile testing")
-        print(f"   • CI/CD integration")
-        print(f"   • Interview demonstrations")
+        print("\n🚀 Ready for:")
+        print("   • UI automation practice")
+        print("   • API testing exercises")
+        print("   • Performance testing")
+        print("   • Mobile testing")
+        print("   • CI/CD integration")
+        print("   • Interview demonstrations")
 
     except Exception as e:
         logger.error(f"Demo error: {e}")

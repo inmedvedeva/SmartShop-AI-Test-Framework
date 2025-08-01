@@ -267,7 +267,7 @@ class TestIntegrationBasic:
         driver.get("https://automationexercise.com/nonexistent-page")
 
         # Should handle 404 gracefully
-        current_url = driver.current_url
+        # current_url = driver.current_url  # Unused variable
 
         # Navigate back to valid page
         driver.get("https://automationexercise.com/")

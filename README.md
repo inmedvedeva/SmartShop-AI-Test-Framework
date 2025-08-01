@@ -432,7 +432,7 @@ from selenium.webdriver.common.by import By
 
 class CustomPage(BasePage):
     CUSTOM_ELEMENT = (By.CSS_SELECTOR, ".custom-selector")
-    
+
     def custom_action(self):
         self.click_element(self.CUSTOM_ELEMENT)
 ```
@@ -479,7 +479,7 @@ OPENAI_MODEL=gpt-3.5-turbo
    ```bash
    # Update webdriver
    pip install --upgrade webdriver-manager
-   
+
    # Install Playwright browsers
    playwright install
    ```

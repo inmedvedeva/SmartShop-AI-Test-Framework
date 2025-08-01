@@ -26,7 +26,7 @@ def main():
 
     # Import and start mock API server if needed
     try:
-        from src.api.mock_api_server import app
+        from src.api.mock_api_server import app  # noqa: F401
 
         print("Mock API server available")
     except ImportError:

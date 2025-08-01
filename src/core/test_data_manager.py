@@ -5,7 +5,7 @@ Test data management utilities for SmartShop AI Test Framework
 import json
 import random
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 from loguru import logger
 

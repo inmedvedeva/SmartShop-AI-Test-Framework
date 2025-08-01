@@ -2,7 +2,6 @@
 Mobile tests for Automation Exercise using Playwright
 """
 
-import os
 import time
 
 import pytest
@@ -343,7 +342,7 @@ class TestAutomationExerciseMobile(MobileTestBase):
         self.navigate_to("https://automationexercise.com/")
 
         # Get initial viewport
-        initial_viewport = self.get_viewport_size()
+        # initial_viewport = self.get_viewport_size()  # Unused variable
 
         # Test landscape orientation
         self.rotate_to_landscape()

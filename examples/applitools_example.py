@@ -235,7 +235,7 @@ class ApplitoolsExample:
                             By.CSS_SELECTOR, ".navbar-nav"
                         )
                         print(f"   ✅ Desktop menu displayed")
-                except:
+                except Exception:
                     print(f"   ⚠️  Menu not found for {device_name}")
 
             except Exception as e:

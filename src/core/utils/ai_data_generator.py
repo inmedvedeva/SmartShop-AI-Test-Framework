@@ -5,7 +5,7 @@ Uses OpenAI to create realistic test data
 
 import json
 import random
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import openai
 from faker import Faker

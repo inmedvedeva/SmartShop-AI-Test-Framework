@@ -5,7 +5,6 @@ Simple mobile test to verify Playwright setup
 import os
 import time
 
-import pytest
 from loguru import logger
 from playwright.sync_api import sync_playwright
 

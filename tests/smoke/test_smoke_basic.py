@@ -7,7 +7,6 @@ is working before running more comprehensive test suites.
 
 import time
 
-import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -192,7 +191,7 @@ class TestSmokeBasic:
         driver.get("https://automationexercise.com/nonexistent-page")
 
         # Should not crash, should either redirect or show error page
-        current_url = driver.current_url
+        # current_url = driver.current_url  # Unused variable
 
         # Navigate back to valid page
         driver.get("https://automationexercise.com/")
